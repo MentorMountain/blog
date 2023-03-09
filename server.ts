@@ -16,38 +16,38 @@ app.use("/", (req, _, next) => {
   next();
 });
 
-// Create question
-app.post("/api/questions", (req, res) => {
-  /* Validation
-      - Ensure responder is a student
-  */
+// // Create question
+// app.post("/api/questions", (req, res) => {
+//   /* Validation
+//       - Ensure responder is a student
+//   */
 
-  res.json("UNIMPLEMENTED");
-  // Return created UUID
-});
+//   res.json("UNIMPLEMENTED");
+//   // Return created UUID
+// });
 
-// Get question thread
-app.get("/api/questions/:questionUUID", (req, res) => {
-  res.json("UNIMPLEMENTED");
-});
+// // Get question thread
+// app.get("/api/questions/:questionUUID", (req, res) => {
+//   res.json("UNIMPLEMENTED");
+// });
 
-// Respond to question
-app.post("/api/questions/:questionUUID/responses", (req, res) => {
-  const uuid = req.params.questionUUID;
+// // Respond to question
+// app.post("/api/questions/:questionUUID/responses", (req, res) => {
+//   const uuid = req.params.questionUUID;
 
-  /* Validation
-    - Ensure question exists
-    - Ensure responder is a mentor
-  */
+//   /* Validation
+//     - Ensure question exists
+//     - Ensure responder is a mentor
+//   */
 
-  res.json("UNIMPLEMENTED");
-});
+//   res.json("UNIMPLEMENTED");
+// });
 
-// Get questions UUIDs
-app.get("/api/questions", (req, res) => {
-  const questionUUIDs = [];
-  res.json("UNIMPLEMENTED");
-});
+// // Get questions UUIDs
+// app.get("/api/questions", (req, res) => {
+//   const questionUUIDs = [];
+//   res.json("UNIMPLEMENTED");
+// });
 
 app.get("/api/health", (_, res) => {
   res.json({
