@@ -78,21 +78,15 @@ app.post('/api/blog', (req: Request, res: Response) => {
   // TODO-#2: Validate/authenticate authorID 
   if (!blogData.authorID) {
     console.error('Request missing authorID');
-    return res.status(400).send({
-      error: 'Missing authorID'
-    });
+    return res.status(400).send();
   }
   if (!blogData.title) {
     console.error('Request missing title');
-    return res.status(400).send({
-      error: 'Missing title'
-    });
+    return res.status(400).send();
   }
   if (!blogData.content) {
     console.error('Request missing content');
-    return res.status(400).send({
-      error: 'Missing content'
-    });
+    return res.status(400).send();
   }
 
   // Cleaning up data before inserting into DB
@@ -109,13 +103,10 @@ app.post('/api/blog', (req: Request, res: Response) => {
     content
   }).then((doc: any) => {
     console.info('stored new doc id#', doc.id);
-    return res.status(201).send(doc);
+    return res.status(201).send();
   }).catch((err: any) => {
     console.error(err);
-    return res.status(404).send({
-      error: 'unable to store',
-      err
-    });
+    return res.status(400).send();
   });
 });
 
