@@ -98,7 +98,7 @@ app.post('/api/blog', (req: Request, res: Response) => {
     content
   }).then((doc: any) => {
     console.info('stored new doc id#', doc.id);
-    return res.status(200).send(doc);
+    return res.status(201).send(doc);
   }).catch((err: any) => {
     console.error(err);
     return res.status(404).send({
