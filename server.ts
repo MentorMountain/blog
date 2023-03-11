@@ -2,13 +2,13 @@
  *                               Imports + Setup                              *
  ******************************************************************************/
 // Firestore (DB) import
-const Firestore = require('@google-cloud/firestore');
+import { Firestore } from '@google-cloud/firestore';
 
 // Firestore (DB) setup
-const PROJECTID = 'double-willow-379721';
-const COLLECTION_NAME = 'test-blog';
-const firestore = new Firestore({
-  projectId: PROJECTID,
+const PROJECT_ID: string = process.env.PROJECT_ID!;
+const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME!;
+const firestore: Firestore = new Firestore({
+  projectId: PROJECT_ID,
   timestampsInSnapshots: true
   // NOTE: Don't hardcode your project credentials here.
   // If you have to, export the following to your shell:
@@ -17,15 +17,15 @@ const firestore = new Firestore({
 });
 
 // Express (REST) import
-const express = require('express');
+import express, { Express } from 'express';
 import { Request, Response, NextFunction } from 'express';
 // Express (REST) setup
-const app = express();
+const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS (security?) import
-const cors = require('cors');
+import cors from "cors";
 // CORS (security?) setup
 app.use(cors({
   origin: '*'
@@ -43,6 +43,16 @@ app.use(cors({
 const GCLOUD_STRING_LENGTH_LIMIT = 750;
 // DB_STR_LIMIT slightly shorter for safety
 const DB_STR_LIMIT = GCLOUD_STRING_LENGTH_LIMIT - 50;
+
+
+/******************************************************************************
+ *                              Helper Functions                              *
+ ******************************************************************************/
+// Reduce the length of the (string) field in a request such that it meets...
+// ...the gcloud length limit - whitespace is trimmed too
+const cleanRequestField = (requestField: string): string => {
+  return requestField.trim().substring(0, DB_STR_LIMIT);
+};
 
 
 /******************************************************************************
@@ -65,6 +75,7 @@ app.get('/api/health', (_: Request, res: Response) => {
 app.post('/api/blog', (req: Request, res: Response) => {
   // Error if request missing expected data
   const blogData = (req.body) || {};
+  // TODO-#2: Validate/authenticate authorID 
   if (!blogData.authorID) {
     console.error('Request missing authorID');
     return res.status(400).send({
@@ -85,9 +96,9 @@ app.post('/api/blog', (req: Request, res: Response) => {
   }
 
   // Cleaning up data before inserting into DB
-  const authorID = blogData.authorID.trim().substring(0, DB_STR_LIMIT);
-  const title = blogData.title.trim().substring(0, DB_STR_LIMIT);
-  const content = blogData.content.trim().substring(0, DB_STR_LIMIT);
+  const authorID = cleanRequestField(blogData.authorID);
+  const title = cleanRequestField(blogData.title);
+  const content = cleanRequestField(blogData.content);
   const date = new Date().getTime(); // <-- Get blog post creation time
 
   // Inserting blog post into datastore
