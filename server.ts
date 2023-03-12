@@ -5,8 +5,8 @@
 import { Firestore } from '@google-cloud/firestore';
 
 // Firestore (DB) setup
-const PROJECT_ID: string = process.env.PROJECT_ID!;
-const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME!;
+const PROJECT_ID: string = process.env.PROJECT_ID || "double-willow-379721"; // TODO-JAROD: REMOVE THE PROJECT CREDENTIALS!!
+const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME || "blog"; // TODO-JAROD: REMOVE THE PROJECT CREDENTIALS!!
 const firestore: Firestore = new Firestore({
   projectId: PROJECT_ID,
   timestampsInSnapshots: true
@@ -108,6 +108,43 @@ app.post('/api/blog', (req: Request, res: Response) => {
     console.error(err);
     return res.status(400).send();
   });
+});
+
+// Return a list of all existing blogs
+
+/* OUTPUT: 200 OK
+[
+  {
+    postID:   string;
+    authorID: string;
+    date:     number;
+    title:    string;
+    content:  string;
+  },
+    ...
+]
+I.E: the above is a list of objects with 
+*/
+app.get('/api/blog', (req: Request, res: Response) => {
+  // Get all blog IDs
+  const blogIDs: any = [];
+  //query firestore for all question ids, returning them in an array
+  firestore.collection(COLLECTION_NAME)
+    .get()
+    .then((data: any) => {
+      data.forEach((doc: any) => {
+        blogIDs.push(doc.id);
+      });
+      console.log(`SENDING ${blogIDs}`);
+      return res.status(200).send(JSON.stringify(blogIDs));
+    }).catch((err: any) => {
+      console.error(err);
+      res.status(404).send({ // TODO: make empty
+        error: 'Unable to retrieve the blog ids',
+        err
+      });
+      return res.status(400).send();
+    });
 });
 
 
