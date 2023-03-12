@@ -2,7 +2,7 @@
  *                               Imports + Setup                              *
  ******************************************************************************/
 // Firestore (DB) import
-import { Firestore, QuerySnapshot, QueryDocumentSnapshot } from '@google-cloud/firestore';
+import { Firestore, QuerySnapshot, QueryDocumentSnapshot, DocumentData } from '@google-cloud/firestore';
 
 // Firestore (DB) setup
 const PROJECT_ID: string = process.env.PROJECT_ID!;
@@ -44,9 +44,9 @@ import { BlogPostSubmissionData } from './src/model/BlogPostSubmissionData';
 // If you want to increase this limit, verify that we are using NON-INDEXED...
 // ...field values 
 // See: https://firebase.google.com/docs/firestore/quotas#limits
-const GCLOUD_STRING_LENGTH_LIMIT = 750;
+const GCLOUD_STRING_LENGTH_LIMIT: number = 750;
 // DB_STR_LIMIT slightly shorter for safety
-const DB_STR_LIMIT = GCLOUD_STRING_LENGTH_LIMIT - 50;
+const DB_STR_LIMIT: number = GCLOUD_STRING_LENGTH_LIMIT - 50;
 
 
 /******************************************************************************
@@ -124,12 +124,13 @@ app.get('/api/blog', (_: Request, res: Response) => {
     .get()
     .then((data: QuerySnapshot) => {
       data.forEach((doc: QueryDocumentSnapshot) => {
+        const blogPostData: DocumentData = doc.data();
         blogPosts.push({
           postID: doc.id,
-          authorID: doc.data().authorID,
-          date: doc.data().date,
-          title: doc.data().title,
-          content: doc.data().content
+          authorID: blogPostData.authorID,
+          date: blogPostData.date,
+          title: blogPostData.title,
+          content: blogPostData.content
         });
       });
       const responseData: string = JSON.stringify(blogPosts);
