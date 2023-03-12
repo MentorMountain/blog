@@ -96,7 +96,8 @@ app.post('/api/blog', (req: Request, res: Response) => {
   const date = new Date().getTime(); // <-- Get blog post creation time
 
   // Inserting blog post into datastore
-  firestore.collection(COLLECTION_NAME).add({
+  firestore.collection(COLLECTION_NAME)
+  .add({
     authorID,
     date,
     title,
