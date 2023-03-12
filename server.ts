@@ -5,8 +5,8 @@
 import { Firestore, QuerySnapshot, QueryDocumentSnapshot } from '@google-cloud/firestore';
 
 // Firestore (DB) setup
-const PROJECT_ID: string = process.env.PROJECT_ID || "double-willow-379721"; // TODO-JAROD: REMOVE THE PROJECT CREDENTIALS!!
-const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME || "blog"; // TODO-JAROD: REMOVE THE PROJECT CREDENTIALS!!
+const PROJECT_ID: string = process.env.PROJECT_ID!;
+const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME!;
 const firestore: Firestore = new Firestore({
   projectId: PROJECT_ID,
   timestampsInSnapshots: true
