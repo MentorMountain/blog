@@ -2,7 +2,7 @@
  *                               Imports + Setup                              *
  ******************************************************************************/
 // Firestore (DB) import
-import { Firestore } from '@google-cloud/firestore';
+import { Firestore, QuerySnapshot, QueryDocumentSnapshot } from '@google-cloud/firestore';
 
 // Firestore (DB) setup
 const PROJECT_ID: string = process.env.PROJECT_ID || "double-willow-379721"; // TODO-JAROD: REMOVE THE PROJECT CREDENTIALS!!
@@ -30,6 +30,10 @@ import cors from "cors";
 app.use(cors({
   origin: '*'
 }));
+
+// Data models
+import { BlogPostResponseData } from './src/model/BlogPostResponseData';
+import { BlogPostSubmissionData } from './src/model/BlogPostSubmissionData';
 
 
 /******************************************************************************
@@ -74,7 +78,7 @@ app.get('/api/health', (_: Request, res: Response) => {
 // Inserting a new blog post to datastore
 app.post('/api/blog', (req: Request, res: Response) => {
   // Error if request missing expected data
-  const blogData = (req.body) || {};
+  const blogData: BlogPostSubmissionData = (req.body) || {};
   // TODO-#2: Validate/authenticate authorID 
   if (!blogData.authorID) {
     console.error('Request missing authorID');
@@ -90,10 +94,10 @@ app.post('/api/blog', (req: Request, res: Response) => {
   }
 
   // Cleaning up data before inserting into DB
-  const authorID = cleanRequestField(blogData.authorID);
-  const title = cleanRequestField(blogData.title);
-  const content = cleanRequestField(blogData.content);
-  const date = new Date().getTime(); // <-- Get blog post creation time
+  const authorID: string = cleanRequestField(blogData.authorID);
+  const title: string = cleanRequestField(blogData.title);
+  const content: string = cleanRequestField(blogData.content);
+  const date: number = new Date().getTime(); // <-- Get blog post creation time
 
   // Inserting blog post into datastore
   firestore.collection(COLLECTION_NAME)
@@ -112,38 +116,27 @@ app.post('/api/blog', (req: Request, res: Response) => {
 });
 
 // Return a list of all existing blogs
-
-/* OUTPUT: 200 OK
-[
-  {
-    postID:   string;
-    authorID: string;
-    date:     number;
-    title:    string;
-    content:  string;
-  },
-    ...
-]
-I.E: the above is a list of objects with 
-*/
-app.get('/api/blog', (req: Request, res: Response) => {
-  // Get all blog IDs
-  const blogIDs: any = [];
-  //query firestore for all question ids, returning them in an array
+app.get('/api/blog', (_: Request, res: Response) => {
+  // Get all blog documents from firestore and create a response using...
+  // ...their IDs and data
+  const blogPosts: BlogPostResponseData[] = [];
   firestore.collection(COLLECTION_NAME)
     .get()
-    .then((data: any) => {
-      data.forEach((doc: any) => {
-        blogIDs.push(doc.id);
+    .then((data: QuerySnapshot) => {
+      data.forEach((doc: QueryDocumentSnapshot) => {
+        blogPosts.push({
+          postID: doc.id,
+          authorID: doc.data().authorID,
+          date: doc.data().date,
+          title: doc.data().title,
+          content: doc.data().content
+        });
       });
-      console.log(`SENDING ${blogIDs}`);
-      return res.status(200).send(JSON.stringify(blogIDs));
+      const responseData: string = JSON.stringify(blogPosts);
+      console.log('send data in response:', responseData);
+      return res.status(200).send(responseData);
     }).catch((err: any) => {
       console.error(err);
-      res.status(404).send({ // TODO: make empty
-        error: 'Unable to retrieve the blog ids',
-        err
-      });
       return res.status(400).send();
     });
 });
