@@ -1,15 +1,19 @@
-/******************************************************************************
- *                               Imports + Setup                              *
- ******************************************************************************/
-// Firestore (DB) import
 import {
-  Firestore,
-  QuerySnapshot,
-  QueryDocumentSnapshot,
   DocumentData,
+  Firestore,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
 } from "@google-cloud/firestore";
+import cors from "cors";
+import express, { Express, NextFunction, Request, Response } from "express";
+import { BlogPostResponseData } from "./src/model/BlogPostResponseData";
+import { BlogPostSubmissionData } from "./src/model/BlogPostSubmissionData";
+import { LoginTokenParameters, validateLoginToken } from "cmpt474-mm-jwt-middleware";
 
-// Firestore (DB) setup
+const app: Express = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const PROJECT_ID: string = process.env.PROJECT_ID!;
 const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME!;
 const firestore: Firestore = new Firestore({
@@ -21,21 +25,11 @@ const firestore: Firestore = new Firestore({
   // keyFilename: '/cred/cloud-functions-firestore-000000000000.json',
 });
 
-// Express (REST) import
-import express, { Express } from "express";
-import { Request, Response, NextFunction } from "express";
-import cors from "cors";
-
-// Express (REST) setup
-const app: Express = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // https://www.npmjs.com/package/cors
 const whitelist = [
   "https://mentormountain.ca",
   "https://www.mentormountain.ca",
-  "https://www.sfu.ca"
+  "https://www.sfu.ca",
 ];
 
 const corsOptions = {
@@ -50,9 +44,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+const LOGIN_TOKEN_VALIDATION_PARAMETERS: LoginTokenParameters = {
+  JWT_SECRET: process.env.JWT_SECRET || "secret",
+  GATEWAY_DOMAIN: process.env.GATEWAY_DOMAIN || "http://localhost",
+  WEBAPP_DOMAIN: process.env.WEBAPP_DOMAIN || "http://localhost",
+};
+
 // Data models
-import { BlogPostResponseData } from "./src/model/BlogPostResponseData";
-import { BlogPostSubmissionData } from "./src/model/BlogPostSubmissionData";
 
 /******************************************************************************
  *                             Datastore Constants                            *
@@ -92,7 +90,7 @@ app.get("/api/health", (_: Request, res: Response) => {
 });
 
 // Inserting a new blog post to datastore
-app.post("/api/blog", (req: Request, res: Response) => {
+app.post("/api/blog", validateLoginToken(LOGIN_TOKEN_VALIDATION_PARAMETERS), (req: Request, res: Response) => {
   // Error if request missing expected data
   const blogData: BlogPostSubmissionData = req.body || {};
   // TODO-#2: Validate/authenticate authorID
@@ -135,7 +133,7 @@ app.post("/api/blog", (req: Request, res: Response) => {
 });
 
 // Return a list of all existing blogs
-app.get("/api/blog", (_: Request, res: Response) => {
+app.get("/api/blog", validateLoginToken(LOGIN_TOKEN_VALIDATION_PARAMETERS), (_: Request, res: Response) => {
   // Get all blog documents from firestore and create a response using...
   // ...their IDs and data
   const blogPosts: BlogPostResponseData[] = [];

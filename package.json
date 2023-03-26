@@ -15,6 +15,7 @@
     "@google-cloud/firestore": "^4.15.1",
     "axios": "^1.3.4",
     "bcrypt": "^5.1.0",
+    "cmpt474-mm-jwt-middleware": "^3.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
