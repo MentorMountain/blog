@@ -9,6 +9,7 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import { BlogPostResponseData } from "./src/model/BlogPostResponseData";
 import { BlogPostSubmissionData } from "./src/model/BlogPostSubmissionData";
 import {
+  LoginTokenizedRequest,
   LoginTokenParameters,
   validateLoginToken,
 } from "cmpt474-mm-jwt-middleware";
@@ -96,6 +97,8 @@ app.use("/api/blog", validateLoginToken(LOGIN_TOKEN_VALIDATION_PARAMETERS));
 
 // Inserting a new blog post to datastore
 app.post("/api/blog", (req: Request, res: Response) => {
+  const systemRequest = req as LoginTokenizedRequest;
+
   // Error if request missing expected data
   const blogData: BlogPostSubmissionData = req.body || {};
   // TODO-#2: Validate/authenticate authorID
