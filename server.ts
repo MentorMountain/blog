@@ -26,8 +26,14 @@ import express, { Express } from "express";
 import { Request, Response, NextFunction } from "express";
 import cors from "cors";
 
-// Express (REST) setup
 const app: Express = express();
+
+app.get("/api/health", (_: Request, res: Response) => {
+  res.json({
+    health: "OK",
+  });
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 const whitelist = [
   "https://mentormountain.ca",
   "https://www.mentormountain.ca",
-  "https://www.sfu.ca"
+  "https://www.sfu.ca",
 ];
 
 const corsOptions = {
@@ -82,13 +88,6 @@ const cleanRequestField = (requestField: string): string => {
 app.use("/", (req: Request, _: Response, next: NextFunction) => {
   console.log("\n> Request URL:", req.originalUrl, "| Method:", req.method);
   next();
-});
-
-// Health check of API (making sure it's reachable)
-app.get("/api/health", (_: Request, res: Response) => {
-  res.json({
-    health: "OK",
-  });
 });
 
 // Inserting a new blog post to datastore
