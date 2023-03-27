@@ -1,19 +1,23 @@
-/******************************************************************************
- *                               Imports + Setup                              *
- ******************************************************************************/
-// Firestore (DB) import
 import {
-  Firestore,
-  QuerySnapshot,
-  QueryDocumentSnapshot,
   DocumentData,
+  Firestore,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
 } from "@google-cloud/firestore";
+import {
+  LoginTokenParameters,
+  validateLoginToken,
+} from "cmpt474-mm-jwt-middleware";
+import cors from "cors";
+import express, { Express, NextFunction, Request, Response } from "express";
+import ENV from "./env";
+import { BlogPostResponseData } from "./src/model/BlogPostResponseData";
+import { BlogPostSubmissionData } from "./src/model/BlogPostSubmissionData";
 
 // Firestore (DB) setup
-const PROJECT_ID: string = process.env.PROJECT_ID!;
-const COLLECTION_NAME: string = process.env.DB_COLLECTION_NAME!;
+const COLLECTION_NAME: string = ENV.DB_COLLECTION_NAME!;
 const firestore: Firestore = new Firestore({
-  projectId: PROJECT_ID,
+  projectId: ENV.PROJECT_ID,
   timestampsInSnapshots: true,
   // NOTE: Don't hardcode your project credentials here.
   // If you have to, export the following to your shell:
@@ -21,44 +25,24 @@ const firestore: Firestore = new Firestore({
   // keyFilename: '/cred/cloud-functions-firestore-000000000000.json',
 });
 
-// Express (REST) import
-import express, { Express } from "express";
-import { Request, Response, NextFunction } from "express";
-import cors from "cors";
-
 const app: Express = express();
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: "*" }));
 app.get("/api/health", (_: Request, res: Response) => {
   res.json({
     health: "OK",
   });
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// https://www.npmjs.com/package/cors
-const whitelist = [
-  "https://mentormountain.ca",
-  "https://www.mentormountain.ca",
-  "https://www.sfu.ca",
-];
-
-const corsOptions = {
-  origin: function (origin: any, callback: any) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+const LOGIN_TOKEN_VALIDATION_PARAMETERS: LoginTokenParameters = {
+  JWT_SECRET: ENV.JWT_SECRET,
+  GATEWAY_DOMAIN: ENV.GATEWAY_DOMAIN,
+  WEBAPP_DOMAIN: ENV.WEBAPP_DOMAIN,
 };
-
-app.use(cors(corsOptions));
-
-// Data models
-import { BlogPostResponseData } from "./src/model/BlogPostResponseData";
-import { BlogPostSubmissionData } from "./src/model/BlogPostSubmissionData";
+const LOGIN_TOKEN_VALIDATOR = validateLoginToken(
+  LOGIN_TOKEN_VALIDATION_PARAMETERS
+);
 
 /******************************************************************************
  *                             Datastore Constants                            *
@@ -89,6 +73,8 @@ app.use("/", (req: Request, _: Response, next: NextFunction) => {
   console.log("\n> Request URL:", req.originalUrl, "| Method:", req.method);
   next();
 });
+
+app.use(LOGIN_TOKEN_VALIDATOR);
 
 // Inserting a new blog post to datastore
 app.post("/api/blog", (req: Request, res: Response) => {
