@@ -29,7 +29,7 @@ const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/api/health", (_: Request, res: Response) => {
+app.get("/api/health", cors({origin: '*'}), (_: Request, res: Response) => {
   res.json({
     health: "OK",
   });
