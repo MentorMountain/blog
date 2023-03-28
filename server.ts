@@ -28,12 +28,14 @@ const firestore: Firestore = new Firestore({
 const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "*" }));
+
 app.get("/api/health", (_: Request, res: Response) => {
   res.json({
     health: "OK",
   });
 });
+
+app.use(cors({ origin: ENV.WEBAPP_DOMAIN }));
 
 const LOGIN_TOKEN_VALIDATION_PARAMETERS: LoginTokenParameters = {
   JWT_SECRET: ENV.JWT_SECRET,
