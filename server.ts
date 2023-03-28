@@ -5,6 +5,7 @@ import {
   QuerySnapshot,
 } from "@google-cloud/firestore";
 import {
+  LoginTokenizedRequest,
   LoginTokenParameters,
   validateLoginToken,
 } from "cmpt474-mm-jwt-middleware";
@@ -29,7 +30,7 @@ const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/api/health", cors({origin: '*'}), (_: Request, res: Response) => {
+app.get("/api/health", cors({ origin: "*" }), (_: Request, res: Response) => {
   res.json({
     health: "OK",
   });
@@ -37,14 +38,13 @@ app.get("/api/health", cors({origin: '*'}), (_: Request, res: Response) => {
 
 const corsOptions = {
   origin: function (origin: any, callback: any) {
-    if ([ENV.WEBAPP_DOMAIN, 'http://localhost:3000'].indexOf(origin) !== -1) {
+    if ([ENV.WEBAPP_DOMAIN, "http://localhost:3000"].indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
 };
-
 
 app.use(cors(corsOptions));
 
@@ -91,13 +91,13 @@ app.use(LOGIN_TOKEN_VALIDATOR);
 
 // Inserting a new blog post to datastore
 app.post("/api/blog", (req: Request, res: Response) => {
+  const blogRequest: LoginTokenizedRequest = req as LoginTokenizedRequest;
+
   // Error if request missing expected data
-  const blogData: BlogPostSubmissionData = req.body || {};
+  const blogData: BlogPostSubmissionData = blogRequest.body || {};
   // TODO-#2: Validate/authenticate authorID
-  if (!blogData.authorID) {
-    console.error("Request missing authorID");
-    return res.status(400).send();
-  }
+  const postAuthorID = blogRequest.user.computingID;
+
   if (!blogData.title) {
     console.error("Request missing title");
     return res.status(400).send();
@@ -108,7 +108,7 @@ app.post("/api/blog", (req: Request, res: Response) => {
   }
 
   // Cleaning up data before inserting into DB
-  const authorID: string = cleanRequestField(blogData.authorID);
+  const authorID: string = postAuthorID;
   const title: string = cleanRequestField(blogData.title);
   const content: string = cleanRequestField(blogData.content);
   const date: number = new Date().getTime(); // <-- Get blog post creation time
