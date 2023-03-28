@@ -35,7 +35,18 @@ app.get("/api/health", cors({origin: '*'}), (_: Request, res: Response) => {
   });
 });
 
-app.use(cors({ origin: ENV.WEBAPP_DOMAIN }));
+const corsOptions = {
+  origin: function (origin: any, callback: any) {
+    if ([ENV.WEBAPP_DOMAIN, 'http://localhost:3000'].indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+
+app.use(cors(corsOptions));
 
 const LOGIN_TOKEN_VALIDATION_PARAMETERS: LoginTokenParameters = {
   JWT_SECRET: ENV.JWT_SECRET,
