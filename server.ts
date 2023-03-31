@@ -96,7 +96,7 @@ app.post("/api/blog", (req: Request, res: Response) => {
   // Error if request missing expected data
   const blogData: BlogPostSubmissionData = blogRequest.body || {};
   // TODO-#2: Validate/authenticate authorID
-  const postAuthorID = blogRequest.user.computingID;
+  const postAuthorID = blogRequest.user.username;
 
   if (!blogData.title) {
     console.error("Request missing title");
