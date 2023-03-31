@@ -372,10 +372,10 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
-cmpt474-mm-jwt-middleware@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/cmpt474-mm-jwt-middleware/-/cmpt474-mm-jwt-middleware-5.0.0.tgz#b945922d3d1d1f8aa8f4b070ed40bb7c1136f218"
-  integrity sha512-/vkwaU6VnrJr1Ve3IuIqF2HGh5bXW5gDF1+2xoM5PeahwAw+bJ9OfBDZ5LEVcE0lZDgB3ueye5QjGC4f5qKPiA==
+cmpt474-mm-jwt-middleware@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/cmpt474-mm-jwt-middleware/-/cmpt474-mm-jwt-middleware-6.1.0.tgz#1b94a2c54fa77790921f78d9a4ada1747084559a"
+  integrity sha512-dKFklijQNDorps85IFj9PegnaVAKGwv/db7wXvMdJlvy5GjKDzdWh5sg+MVU/GDhyZupoLb5gr2UA/ynsFn70g==
   dependencies:
     express "^4.18.2"
     jsonwebtoken "^9.0.0"
