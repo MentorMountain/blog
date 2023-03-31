@@ -93,6 +93,9 @@ app.use(LOGIN_TOKEN_VALIDATOR);
 app.post("/api/blog", (req: Request, res: Response) => {
   const blogRequest: LoginTokenizedRequest = req as LoginTokenizedRequest;
 
+  if (blogRequest.user.role != "mentor") {
+    return res.status(403).send("Only Mentors can post blogs.");
+  } 
   // Error if request missing expected data
   const blogData: BlogPostSubmissionData = blogRequest.body || {};
   // TODO-#2: Validate/authenticate authorID
